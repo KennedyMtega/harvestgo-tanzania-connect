@@ -15,11 +15,11 @@ const orderDetails = {
     id: '1',
     name: 'Mazao Fresh Farm',
     address: '123 Samora Avenue, Dar es Salaam',
-    position: [39.2183, -6.7824],
+    position: [39.2183, -6.7824] as [number, number],
   },
   delivery: {
     address: '456 Uhuru Street, Dar es Salaam',
-    position: [39.2383, -6.8124],
+    position: [39.2383, -6.8124] as [number, number],
   },
   driver: {
     id: '1',
@@ -28,7 +28,7 @@ const orderDetails = {
     photo: null,
     vehicle: 'Motorcycle',
     rating: 4.9,
-    position: [39.2283, -6.7924],
+    position: [39.2283, -6.7924] as [number, number],
   },
   items: [
     { id: '1', name: 'Tomatoes', price: 3000, unit: 'kg', quantity: 2 },

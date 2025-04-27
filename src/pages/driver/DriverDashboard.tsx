@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -27,7 +26,6 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Mock data
 const availablePickups = [
   {
     id: '1',
@@ -58,7 +56,7 @@ const availablePickups = [
 const activeDeliveries = [
   {
     id: '3',
-    status: 'accepted', // accepted, picked_up, delivering
+    status: 'accepted',
     vendorName: 'Kilimo Safi Store',
     vendorLocation: '456 Nyerere Road, Dar es Salaam',
     vendorPosition: [39.2283, -6.8024],
@@ -111,15 +109,13 @@ const DriverDashboard: React.FC = () => {
   const [totalEarnings, setTotalEarnings] = useState<number>(16000);
   const [deliveriesCompleted, setDeliveriesCompleted] = useState<number>(3);
   const [activeDelivery, setActiveDelivery] = useState<any>(activeDeliveries[0]);
+  const [completedDeliveries, setCompletedDeliveries] = useState<any[]>(completedDeliveries);
   
-  // Simulate location updates for active delivery
   useEffect(() => {
     if (!activeDelivery) return;
     
     const interval = setInterval(() => {
-      // This would be replaced with actual GPS updates in a real app
       if (activeDelivery.status === 'accepted') {
-        // Move driver closer to vendor
         setActiveDelivery((prev: any) => ({
           ...prev,
           driverPosition: [
@@ -128,7 +124,6 @@ const DriverDashboard: React.FC = () => {
           ]
         }));
       } else if (activeDelivery.status === 'picked_up') {
-        // Move driver closer to customer
         setActiveDelivery((prev: any) => ({
           ...prev,
           driverPosition: [
@@ -163,13 +158,12 @@ const DriverDashboard: React.FC = () => {
       description: `You've accepted a pickup from ${selectedPickup.vendorName}.`,
     });
     
-    // In a real app, we'd update the state with new data from API
     const newDelivery = {
       ...selectedPickup,
       status: 'accepted',
       customerName: 'New Customer',
       customerPhone: '+255712345678',
-      driverPosition: [39.2183, -6.8124], // Initial driver position
+      driverPosition: [39.2183, -6.8124],
     };
     
     setActiveDelivery(newDelivery);
@@ -203,7 +197,6 @@ const DriverDashboard: React.FC = () => {
   const markAsDelivered = () => {
     if (!activeDelivery) return;
     
-    // Add to completed deliveries
     const newCompletedDelivery = {
       id: activeDelivery.id,
       vendorName: activeDelivery.vendorName,
@@ -228,7 +221,6 @@ const DriverDashboard: React.FC = () => {
     const markers: Marker[] = [];
     
     if (activeDelivery) {
-      // Add vendor marker
       markers.push({
         id: `vendor-${activeDelivery.id}`,
         position: activeDelivery.vendorPosition,
@@ -236,7 +228,6 @@ const DriverDashboard: React.FC = () => {
         data: { name: activeDelivery.vendorName }
       });
       
-      // Add customer marker
       markers.push({
         id: `customer-${activeDelivery.id}`,
         position: activeDelivery.customerPosition,
@@ -244,7 +235,6 @@ const DriverDashboard: React.FC = () => {
         data: { name: activeDelivery.customerName }
       });
       
-      // Add driver marker if we have position
       if (activeDelivery.driverPosition) {
         markers.push({
           id: `driver-${activeDelivery.id}`,
@@ -260,14 +250,12 @@ const DriverDashboard: React.FC = () => {
   return (
     <Layout userType="driver" hideFooter>
       <div className="h-screen flex flex-col">
-        {/* Map */}
         <div className="flex-1 relative">
           <Map 
             markers={getMapMarkers()}
             center={activeDelivery?.driverPosition || activeDelivery?.vendorPosition || [39.2183, -6.7824]}
           />
           
-          {/* Online/Offline Toggle */}
           <div className="absolute top-4 left-4 right-4 z-10">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 flex items-center justify-between">
               <div className="flex items-center">
@@ -278,7 +266,6 @@ const DriverDashboard: React.FC = () => {
             </div>
           </div>
           
-          {/* Active Delivery Card */}
           {activeDelivery && (
             <div className="absolute bottom-4 left-4 right-4 z-10">
               <Card>
@@ -346,7 +333,6 @@ const DriverDashboard: React.FC = () => {
           )}
         </div>
         
-        {/* Bottom Sheet */}
         {!activeDelivery && (
           <div className="bg-white dark:bg-gray-800 rounded-t-xl shadow-lg h-1/2 overflow-hidden">
             <div className="p-4">
@@ -498,7 +484,6 @@ const DriverDashboard: React.FC = () => {
         )}
       </div>
       
-      {/* Pickup Detail Dialog */}
       <Dialog open={showPickupDetails} onOpenChange={setShowPickupDetails}>
         <DialogContent>
           <DialogHeader>

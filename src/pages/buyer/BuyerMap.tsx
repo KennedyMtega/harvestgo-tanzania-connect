@@ -82,7 +82,7 @@ const crops = [
 interface Crop {
   id: string;
   name: string;
-  price?: number;
+  price?: number | string;
   unit?: string;
   inStock?: boolean;
   quantity?: number;
