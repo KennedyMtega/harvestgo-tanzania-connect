@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -109,6 +110,8 @@ const DriverDashboard: React.FC = () => {
   const [totalEarnings, setTotalEarnings] = useState<number>(16000);
   const [deliveriesCompleted, setDeliveriesCompleted] = useState<number>(3);
   const [activeDelivery, setActiveDelivery] = useState<any>(activeDeliveries[0]);
+  
+  // Declare completedDeliveries state BEFORE using it
   const [completedDeliveries, setCompletedDeliveries] = useState<any[]>(completedDeliveries);
   
   useEffect(() => {
@@ -206,6 +209,7 @@ const DriverDashboard: React.FC = () => {
       completedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     
+    // Use setCompletedDeliveries to update the state
     setCompletedDeliveries([newCompletedDelivery, ...completedDeliveries]);
     setDeliveriesCompleted(deliveriesCompleted + 1);
     setTotalEarnings(totalEarnings + activeDelivery.estimatedFare);
