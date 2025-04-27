@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -111,9 +110,33 @@ const DriverDashboard: React.FC = () => {
   const [deliveriesCompleted, setDeliveriesCompleted] = useState<number>(3);
   const [activeDelivery, setActiveDelivery] = useState<any>(activeDeliveries[0]);
   
-  // Declare completedDeliveries state BEFORE using it
-  const [completedDeliveries, setCompletedDeliveries] = useState<any[]>(completedDeliveries);
-  
+  const [completedDeliveries, setCompletedDeliveries] = useState<any[]>([
+    {
+      id: '4',
+      vendorName: 'Dar Organic Foods',
+      customerName: 'Mary Smith',
+      status: 'completed',
+      fare: 4500,
+      completedAt: '11:45 AM',
+    },
+    {
+      id: '5',
+      vendorName: 'Mazao Fresh Farm',
+      customerName: 'David Williams',
+      status: 'completed',
+      fare: 6500,
+      completedAt: '10:20 AM',
+    },
+    {
+      id: '6',
+      vendorName: 'Green Harvest',
+      customerName: 'Sarah Johnson',
+      status: 'completed',
+      fare: 5000,
+      completedAt: '09:15 AM',
+    },
+  ]);
+
   useEffect(() => {
     if (!activeDelivery) return;
     
@@ -209,7 +232,6 @@ const DriverDashboard: React.FC = () => {
       completedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     
-    // Use setCompletedDeliveries to update the state
     setCompletedDeliveries([newCompletedDelivery, ...completedDeliveries]);
     setDeliveriesCompleted(deliveriesCompleted + 1);
     setTotalEarnings(totalEarnings + activeDelivery.estimatedFare);
