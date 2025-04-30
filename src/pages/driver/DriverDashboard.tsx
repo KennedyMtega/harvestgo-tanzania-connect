@@ -75,7 +75,8 @@ const activeDeliveries = [
   },
 ];
 
-const completedDeliveries = [
+// Rename this to initialCompletedDeliveries to avoid the naming conflict
+const initialCompletedDeliveries = [
   {
     id: '4',
     vendorName: 'Dar Organic Foods',
@@ -111,8 +112,8 @@ const DriverDashboard: React.FC = () => {
   const [deliveriesCompleted, setDeliveriesCompleted] = useState<number>(3);
   const [activeDelivery, setActiveDelivery] = useState<any>(activeDeliveries[0]);
   
-  // Declare completedDeliveries state BEFORE using it
-  const [completedDeliveries, setCompletedDeliveries] = useState<any[]>(completedDeliveries);
+  // Use the renamed initialCompletedDeliveries here
+  const [completedDeliveries, setCompletedDeliveries] = useState<any[]>(initialCompletedDeliveries);
   
   useEffect(() => {
     if (!activeDelivery) return;
