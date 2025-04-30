@@ -139,7 +139,10 @@ const BuyerMap: React.FC = () => {
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
   
   // Calculate total price for a vendor based on selected crops
-  const calculateVendorTotalPrice = (vendor: Vendor) => {
+  const calculateVendorTotalPrice = (vendor: Vendor | null) => {
+    // Add null check to prevent the error
+    if (!vendor) return 0;
+    
     let total = 0;
     for (const crop of selectedCrops) {
       const vendorItem = vendor.items.find(item => item.id === crop.id);
