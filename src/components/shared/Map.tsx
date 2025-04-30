@@ -11,6 +11,12 @@ interface MapProps {
   onMarkerClick?: (markerId: string) => void;
   showUserLocation?: boolean;
   className?: string;
+  showRoutes?: {
+    from: [number, number];
+    to: [number, number];
+    type: 'vendor-to-driver' | 'driver-to-buyer';
+  }[];
+  highlightMarker?: string;
 }
 
 export interface Marker {
@@ -26,7 +32,9 @@ const Map: React.FC<MapProps> = ({
   markers = [],
   onMarkerClick,
   showUserLocation = true,
-  className = ''
+  className = '',
+  showRoutes = [],
+  highlightMarker
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -42,6 +50,39 @@ const Map: React.FC<MapProps> = ({
 
   // In a real implementation, we would initialize the map library here
   // and set up event handlers, markers, etc.
+
+  // Simple function to draw a line between two points
+  const renderRoute = (from: [number, number], to: [number, number], type: string) => {
+    // Calculate midpoint for a curved line effect
+    const midX = (from[0] + to[0]) / 2;
+    const midY = (from[1] + to[1]) / 2 - 0.005; // Offset to create curve
+    
+    // Convert coordinates to percentage positions on the map
+    const fromX = ((from[0] - center[0]) / 0.02 + 50);
+    const fromY = ((from[1] - center[1]) / -0.02 + 50);
+    const midPointX = ((midX - center[0]) / 0.02 + 50);
+    const midPointY = ((midY - center[1]) / -0.02 + 50);
+    const toX = ((to[0] - center[0]) / 0.02 + 50);
+    const toY = ((to[1] - center[1]) / -0.02 + 50);
+    
+    const path = `M${fromX}% ${fromY}% Q${midPointX}% ${midPointY}%, ${toX}% ${toY}%`;
+    
+    return (
+      <svg 
+        className="absolute inset-0 z-10 pointer-events-none" 
+        width="100%" 
+        height="100%"
+      >
+        <path 
+          d={path} 
+          stroke={type === 'vendor-to-driver' ? '#4F46E5' : '#10B981'} 
+          strokeWidth="2" 
+          fill="none" 
+          strokeDasharray={type === 'vendor-to-driver' ? "5,5" : "none"} 
+        />
+      </svg>
+    );
+  };
 
   return (
     <div 
@@ -66,11 +107,18 @@ const Map: React.FC<MapProps> = ({
               ))}
             </div>
             
+            {/* Render routes */}
+            {showRoutes.map((route, index) => (
+              renderRoute(route.from, route.to, route.type)
+            ))}
+            
             {/* Mock markers */}
             {markers.map((marker) => (
               <button
                 key={marker.id}
-                className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform hover:scale-110 ${
+                className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform ${
+                  highlightMarker === marker.id ? 'scale-125 z-20' : 'hover:scale-110'
+                } ${
                   marker.type === 'vendor' ? 'text-secondary-500' : 
                   marker.type === 'driver' ? 'text-blue-500' : 'text-primary-500'
                 }`}
@@ -82,20 +130,37 @@ const Map: React.FC<MapProps> = ({
               >
                 {marker.type === 'vendor' && (
                   <div className="flex flex-col items-center">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
-                      <path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 10.5c-1.93 0-3.5-1.57-3.5-3.5S10.07 5.5 12 5.5s3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
-                    </svg>
+                    <div className={`relative ${highlightMarker === marker.id ? 'animate-pulse' : ''}`}>
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+                        <path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 10.5c-1.93 0-3.5-1.57-3.5-3.5S10.07 5.5 12 5.5s3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+                      </svg>
+                      {highlightMarker === marker.id && (
+                        <div className="absolute -inset-1 rounded-full border-2 border-secondary-500 animate-ping opacity-75"></div>
+                      )}
+                    </div>
                     {marker.data?.name && (
-                      <div className="bg-white text-black text-xs py-1 px-2 rounded-md shadow-md">
+                      <div className={`bg-white text-black text-xs py-1 px-2 rounded-md shadow-md ${
+                        marker.data.price ? 'font-medium' : ''
+                      }`}>
                         {marker.data.name}
+                        {marker.data.price && (
+                          <div className="text-primary-600">
+                            {marker.data.price.toLocaleString()} TZS
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 )}
                 {marker.type === 'driver' && (
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
-                    <path d="M12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm6-1.8c0-3.4-2.7-6.2-6-6.2s-6 2.8-6 6.2c0 2.5 1.3 4.7 3.3 5.8l2.7 2 2.7-2c2-1.1 3.3-3.3 3.3-5.8z"/>
-                  </svg>
+                  <div className={`relative ${highlightMarker === marker.id ? 'animate-pulse' : ''}`}>
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+                      <path d="M12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm6-1.8c0-3.4-2.7-6.2-6-6.2s-6 2.8-6 6.2c0 2.5 1.3 4.7 3.3 5.8l2.7 2 2.7-2c2-1.1 3.3-3.3 3.3-5.8z"/>
+                    </svg>
+                    {highlightMarker === marker.id && (
+                      <div className="absolute -inset-1 rounded-full border-2 border-blue-500 animate-ping opacity-75"></div>
+                    )}
+                  </div>
                 )}
                 {marker.type === 'buyer' && (
                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
