@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
+import { auth } from '@/lib/firebase';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -18,20 +19,31 @@ const Register = () => {
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const signUp = async (email, password) => {
+    try {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      return userCredential.user;
+    } catch (error) {
+      throw error; // Re-throw to be caught by the caller
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Mock API call to register
-    setTimeout(() => {
+    try {
+      const user = await signUp(email, password);
+      console.log('User registered:', user); // Log for debugging
       setIsLoading(false);
       toast({
         title: "Registration Successful",
         description: "Your account has been created!",
       });
-      
+
+      // Navigate based on the active tab (user type)
       if (activeTab === 'buyer') {
-        navigate('/buyer/onboarding');
+        navigate('/buyer/onboarding'); // Assuming onboarding routes exist
       } else if (activeTab === 'vendor') {
         navigate('/vendor/onboarding');
       } else {

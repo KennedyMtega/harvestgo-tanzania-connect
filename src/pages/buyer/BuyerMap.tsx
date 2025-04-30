@@ -1,9 +1,9 @@
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Search, Menu, X, ShoppingBasket, ChevronDown, ChevronUp, Clock, Check } from 'lucide-react';
-import Map, { Marker } from '@/components/shared/Map';
+import { Search, Menu, ShoppingBasket, ChevronDown, ChevronUp, Clock, Check, X } from 'lucide-react';
+// import Map from '@/components/shared/Map'; // Keep if you integrate the new map component
+import Map from '@/components/shared/Map';
 import Layout from '@/components/layout/Layout';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -95,8 +95,6 @@ interface Crop {
   priceRange?: string;
   unit?: string;
   inStock?: boolean;
-  quantity?: number;
-  category?: string;
 }
 
 interface Vendor {
@@ -118,11 +116,11 @@ interface OrderStatus {
   estimatedTime?: number;
 }
 
-const BuyerMap: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [fireStoreVendors, setFireStoreVendors] = useState<Vendor[]>([]);
   const [showVendorDetail, setShowVendorDetail] = useState<boolean>(false);
   const [showCropList, setShowCropList] = useState<boolean>(false);
   const [selectedCrops, setSelectedCrops] = useState<Crop[]>([]);
@@ -138,6 +136,16 @@ const BuyerMap: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<string>('mpesa');
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
   
+  // Fetch vendors from Firestore on component mount
+  useEffect(() => {
+    const loadVendors = async () => {
+      const vendorsData = await fetchVendors();
+      setFireStoreVendors(vendorsData.map(vendor => ({ ...vendor, position: [vendor.lng, vendor.lat] }))); // Assuming vendorsData has lat/lng which can be mapped to [lng, lat] for this component
+    };
+
+    loadVendors();
+  }, []);
+
   // Calculate total price for a vendor based on selected crops
   const calculateVendorTotalPrice = (vendor: Vendor | null) => {
     // Add null check to prevent the error
@@ -159,7 +167,7 @@ const BuyerMap: React.FC = () => {
       const cropIds = selectedCrops.map(crop => crop.id);
       
       // Filter vendors that have all selected crops
-      const vendors = mockVendors.filter(vendor => {
+      const vendors = fireStoreVendors.filter(vendor => {
         const vendorItemIds = vendor.items.map(item => item.id);
         return cropIds.every(id => vendorItemIds.includes(id));
       });
@@ -381,7 +389,7 @@ const BuyerMap: React.FC = () => {
   };
 
   // Generate markers for the map
-  const generateMapMarkers = (): Marker[] => {
+  const generateMapMarkers = () => {
     const markers: Marker[] = [];
     
     // Add vendor markers when showing filtered vendors
